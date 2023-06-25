@@ -23,7 +23,7 @@ class Node {
     void setSW(Node* NewNode);
     void setSE(Node* NewNode);
     void setdata(int data);
-    void settype(NodeType type);
+    void stype();
     void setPoint(Point* point);
     Node* getNW();
     Node* getNE();

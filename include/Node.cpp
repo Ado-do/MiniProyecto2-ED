@@ -8,6 +8,9 @@ Node::Node(){
     NE = nullptr;
     SW = nullptr;
     SE = nullptr;
+    data = -1;
+    type = WHITE;
+    point = nullptr;
 }
 Node::~Node(){
     delete NW;
@@ -30,8 +33,12 @@ void Node::setSE(Node* NewNode){
 void Node::setdata(int data){
     this->data = data;
 }
-void Node::settype(NodeType type){
-    this->type = type;
+void Node::stype(){ //cambia el color de type
+    if (type == WHITE){
+        type = BLACK;
+    }else{
+        type = WHITE;
+    }
 }
 void Node::setPoint(Point* point){
     this->point = point;
