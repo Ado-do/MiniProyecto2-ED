@@ -8,7 +8,6 @@ class Point {
   public:
     Point();
     Point(int u, int v);
-    ~Point();
 
     void setPoint(int u, int v);
     int getX();

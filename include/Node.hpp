@@ -18,4 +18,18 @@ class Node {
   public:
     Node();
     ~Node();
+    void setNW(Node* NewNode);
+    void setNE(Node* NewNode);
+    void setSW(Node* NewNode);
+    void setSE(Node* NewNode);
+    void setdata(int data);
+    void settype(NodeType type);
+    void setPoint(Point* point);
+    Node* getNW();
+    Node* getNE();
+    Node* getSW();
+    Node* getSE();
+    int getdata();
+    NodeType gettype();
+    Point* getPoint();
 };
