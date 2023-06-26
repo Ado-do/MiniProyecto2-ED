@@ -11,5 +11,5 @@ class Point {
 
     void setPoint(int u, int v);
     int getX();
-    int gety();
+    int getY();
 };

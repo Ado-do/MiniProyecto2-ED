@@ -17,6 +17,6 @@ void Point::setPoint(int u, int v){
 int Point::getX(){
     return(x);
 }
-int Point::gety(){
+int Point::getY(){
     return(y);
 }
