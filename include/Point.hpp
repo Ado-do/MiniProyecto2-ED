@@ -2,14 +2,12 @@
 
 class Point {
   private:
-    int x;
-    int y;
+    int x, y;
     
   public:
-    Point();
-    Point(int u, int v);
+    Point(int = -1, int = -1);
 
-    void setPoint(int u, int v);
+    void setPoint(int, int);
     int getX();
     int getY();
 };

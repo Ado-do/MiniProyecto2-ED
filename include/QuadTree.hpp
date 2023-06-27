@@ -1,54 +1,58 @@
 #pragma once
 
 #include "Point.hpp"
-#include "Node.hpp"
+
+#include <cmath>
+#include <vector>
+#include <iostream>
 
 enum RegionType { WHITE, BLACK };
 
+struct Node {
+    Point point;
+    int data;
+
+    Node(Point = Point(), int = -1);
+};
+
 class QuadTree {
   private:
-    Node* node;
+    Node* node = nullptr;
 
-    Point TopLeftPoint;
-    Point OriginalBottomRightPoint; // Limite Original
-    Point BottomRightPoint; // Limite Modificado
+    Point topLeftPoint;
+    Point originalBotRightPoint; // Limite Original
+    Point botRightPoint; // Limite Modificado
 
-    QuadTree* TopLeft;
-    QuadTree* TopRight;
-    QuadTree* BottomLeft;
-    QuadTree* BottomRight;
+    QuadTree* topLeftQT = nullptr;
+    QuadTree* topRightQT = nullptr;
+    QuadTree* botLeftQT = nullptr;
+    QuadTree* botRightQT = nullptr;
 
     RegionType type;
 
     int count;
-    int datasum;
+    int dataSum;
     int nodesCount;
 
     // * Funciones privadas las Cuales Buscamos que el usuario no use y sirvan como ayuda para otras funciones
-    QuadTree(Point TopLeft, Point BotRight, bool t);
-    int totalNodesAux(QuadTree* QT);
     int countRegionAux(Point pTL, Point pBR, QuadTree* QT);
-    int AggregateRegionAux(Point pTL, Point pBR, QuadTree* QT);
-    Point getPointTL();
-    Point getPointBR();
+    int aggregateRegionAux(Point pTL, Point pBR, QuadTree* QT);
+    void dataSumChange(Point, int, int);
 
   public:
-    QuadTree(); // lo considero inecesario
-    QuadTree(Point TopLeft, Point BotRight);
+    QuadTree(Point, Point, bool = true);
     ~QuadTree();
 
     // * Extras
-    void clear();
-    // void insert(Entity* entity);
-    // void retrieve(std::vector<Entity*>& entities, Entity* entity);
     RegionType getType();
     bool inBounds(Point p);
+    Node* search(Point);
 
     // * Por enunciado
     int totalPoints();
     int totalNodes();
     void insert(Point p, int data);
-    // list();
+    std::vector<Node*> list();
     int countRegion(Point p, int d);
-    int AggregateRegion(Point p, int d);
+    int aggregateRegion(Point p, int d);
 };
