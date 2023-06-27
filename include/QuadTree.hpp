@@ -8,14 +8,18 @@ enum RegionType { WHITE, BLACK };
 class QuadTree {
   private:
     Node* node;
-    Point TopLeft;
-    Point ORBotRight;//original
-    Point BotRight;//alterado
-    QuadTree* TL;
-    QuadTree* TR;
-    QuadTree* BL;
-    QuadTree* BR;
+
+    Point TopLeftPoint;
+    Point OriginalBottomRightPoint; // Limite Original
+    Point BottomRightPoint; // Limite Modificado
+
+    QuadTree* TopLeft;
+    QuadTree* TopRight;
+    QuadTree* BottomLeft;
+    QuadTree* BottomRight;
+
     RegionType type;
+
     int count;
     int datasum;
     int nodesCount;
@@ -23,10 +27,10 @@ class QuadTree {
     // * Funciones privadas las Cuales Buscamos que el usuario no use y sirvan como ayuda para otras funciones
     QuadTree(Point TopLeft, Point BotRight, bool t);
     int totalNodesAux(QuadTree* QT);
-    int cRAux(Point pTL, Point pBR, QuadTree* QT);
-    int ARAux(Point pTL, Point pBR, QuadTree* QT);
-    Point PointTL();
-    Point PointBR();
+    int countRegionAux(Point pTL, Point pBR, QuadTree* QT);
+    int AggregateRegionAux(Point pTL, Point pBR, QuadTree* QT);
+    Point getPointTL();
+    Point getPointBR();
 
   public:
     QuadTree(); // lo considero inecesario
@@ -37,7 +41,7 @@ class QuadTree {
     void clear();
     // void insert(Entity* entity);
     // void retrieve(std::vector<Entity*>& entities, Entity* entity);
-    RegionType gettype();
+    RegionType getType();
     bool inBounds(Point p);
 
     // * Por enunciado
