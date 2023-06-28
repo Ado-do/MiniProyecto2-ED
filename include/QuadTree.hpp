@@ -16,7 +16,7 @@ class QuadTree {
 
     Point topL_point;
     Point botR_point; // Limite Modificado
-    Point originalBotRPoint; // Limite Original
+    Point _botR_point; // Limite Original
 
     QuadTree* topL_QT = nullptr;
     QuadTree* topR_QT = nullptr;
@@ -32,8 +32,6 @@ class QuadTree {
     int countRegionAux(Point pTL, Point pBR, QuadTree* QT);
     int aggregateRegionAux(Point pTL, Point pBR, QuadTree* QT);
     void dataSumChange(Point, int, int);
-
-    bool iequals(const std::string& a, const std::string& b); // Comparar strings sin importar mayúsculas o minúsculas
 
    public:
     QuadTree(Point, Point, bool = true);

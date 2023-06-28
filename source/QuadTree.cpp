@@ -6,7 +6,7 @@ using std::vector, std::string;
 QuadTree::QuadTree(Point _topLeft, Point _botRight, bool first) {
     this->topL_point = _topLeft;
     this->botR_point = _botRight;
-    this->originalBotRPoint = _botRight;
+    this->_botR_point = _botRight;
     
     type = WHITE;
     count = 0;
@@ -14,25 +14,25 @@ QuadTree::QuadTree(Point _topLeft, Point _botRight, bool first) {
     
     // En caso de ser el primer nodo, se debe modificar el botR_point para que sea potencia de 2
     if (first) {
-        int n = log2(abs(this->topL_point.getX() - originalBotRPoint.getX())+1);
-        int m = log2(abs(this->topL_point.getY() - originalBotRPoint.getY())+1);
+        int n = log2(abs(this->topL_point.getX() - _botR_point.getX())+1);
+        int m = log2(abs(this->topL_point.getY() - _botR_point.getY())+1);
 
         // Se verifica si el punto es potencia de 2
-        if (ceil(log2(abs(this->topL_point.getX() - originalBotRPoint.getX())+1)) !=
-            floor(log2(abs(this->topL_point.getX() - originalBotRPoint.getX())+1))) {
+        if (ceil(log2(abs(this->topL_point.getX() - _botR_point.getX())+1)) !=
+            floor(log2(abs(this->topL_point.getX() - _botR_point.getX())+1))) {
 
             // Se busca la potencia de 2 mas cercana
-            while (pow(2, n) < (abs(this->topL_point.getX() - originalBotRPoint.getX()))+1) {
+            while (pow(2, n) < (abs(this->topL_point.getX() - _botR_point.getX()))+1) {
                 n++;
             }
         }
 
         // Se verifica si el punto es potencia de 2
-        if (ceil(log2(abs(this->topL_point.getY() - originalBotRPoint.getY()))+1) !=
-            floor(log2(abs(this->topL_point.getY() - originalBotRPoint.getY()))+1)) {
+        if (ceil(log2(abs(this->topL_point.getY() - _botR_point.getY()))+1) !=
+            floor(log2(abs(this->topL_point.getY() - _botR_point.getY()))+1)) {
             
             // Se busca la potencia de 2 mas cercana
-            while (pow(2, m) < (abs(this->topL_point.getY() - originalBotRPoint.getY()))+1) {
+            while (pow(2, m) < (abs(this->topL_point.getY() - _botR_point.getY()))+1) {
                 m++;
             }
         }
@@ -82,7 +82,7 @@ void QuadTree::insert(Point p, int data, string city) {
         if ((topL_point.getX() == botR_point.getX())) {
             bool sameCity = false;
             for (size_t i = 0; i < nodes.size(); i++) {
-                if (iequals(nodes[i]->city, city)) {
+                if (nodes[i]->city == city) { // Comparacion de nombres
                     dataSumChange(p, nodes[i]->data, data);
                     nodes[i]->data = data;
                     sameCity = true;
@@ -122,10 +122,6 @@ void QuadTree::insert(Point p, int data, string city) {
             }
         }
     }
-}
-
-bool QuadTree::iequals(const string& a, const string& b) {
-    return std::equal(a.begin(), a.end(), b.begin(), b.end(), [](char a, char b) { return tolower(a) == tolower(b); });
 }
 
 void QuadTree::dataSumChange(Point p, int res, int sum) {
@@ -296,8 +292,8 @@ int QuadTree::aggregateRegionAux(Point pTL, Point pBR, QuadTree* QT) {
 RegionType QuadTree::getType() { return (type); }
 
 bool QuadTree::inBounds(Point p) {
-    return (p.getX() >= topL_point.getX() && p.getX() <= originalBotRPoint.getX() &&
-            p.getY() >= topL_point.getY() && p.getY() <= originalBotRPoint.getY());
+    return (p.getX() >= topL_point.getX() && p.getX() <= _botR_point.getX() &&
+            p.getY() >= topL_point.getY() && p.getY() <= _botR_point.getY());
 }
 
 vector<CityNode*> QuadTree::list() {
