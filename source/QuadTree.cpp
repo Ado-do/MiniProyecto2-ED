@@ -1,8 +1,8 @@
 #include "..\include\QuadTree.hpp"
 
-using std::vector;
+using std::vector, std::string;
 
-Node::Node(Point point, int data) : point(point), data(data) {}
+Node::Node(Point p, int d, string c) : point(p), data(d), city(c) {}
 
 QuadTree::QuadTree(Point _topLeft, Point _botRight, bool first) {
     this->topLeftPoint = _topLeft;
@@ -51,7 +51,11 @@ QuadTree::~QuadTree() {
     if (botLeftQT != nullptr) delete botLeftQT;
     if (botRightQT != nullptr) delete botRightQT;
     
-    if (node != nullptr) delete node;
+    if (!nodes.empty()){
+        for (size_t i = 0; i < nodes.size(); i++){
+            delete nodes[i];
+        }
+    }
 }
 
 int QuadTree::totalPoints() { return count; }
@@ -67,7 +71,7 @@ int QuadTree::totalNodes() {
     return count; 
 }
 
-void QuadTree::insert(Point p, int data) {
+void QuadTree::insert(Point p, int data, string city) {
     if (inBounds(p)) {
         // Se verifica si el punto esta dentro del cuadrante
         if (type == WHITE) type = BLACK;
@@ -76,11 +80,18 @@ void QuadTree::insert(Point p, int data) {
 
         // Se crea el nodo en caso de que no exista
         if ((topLeftPoint.getX() == botRightPoint.getX())) {
-            if (node != nullptr) {
-                dataSumChange(p, node->data, data);
-                node->data = data;
-            } else {
-                node = new Node(p, data);
+            bool sameCity = false;
+            for (size_t i = 0; i < nodes.size(); i++) {
+                if (iequals(nodes[i]->city, city)) {
+                    dataSumChange(p, nodes[i]->data, data);
+                    nodes[i]->data = data;
+                    sameCity = true;
+                    break;
+                }
+            }
+            if (!sameCity) {
+                Node* node = new Node(p, data, city);
+                nodes.push_back(node);
             }
         } else {
             // Se crean los cuadrantes en el caso de que no existan
@@ -98,25 +109,29 @@ void QuadTree::insert(Point p, int data) {
             // Se inserta en el cuadrante correspondiente
             if ((topLeftPoint.getX() + botRightPoint.getX()) / 2 >= p.getX()) {
                 if ((topLeftPoint.getY() + botRightPoint.getY()) / 2 >= p.getY()) {
-                    topLeftQT->insert(p, data);
+                    topLeftQT->insert(p, data, city);
                 } else {
-                    botLeftQT->insert(p, data);
+                    botLeftQT->insert(p, data, city);
                 }
             } else {
                 if ((topLeftPoint.getY() + botRightPoint.getY()) / 2 >= p.getY()) {
-                    topRightQT->insert(p, data);
+                    topRightQT->insert(p, data, city);
                 } else {
-                    botRightQT->insert(p, data);
+                    botRightQT->insert(p, data, city);
                 }
             }
         }
     }
 }
 
+bool QuadTree::iequals(const string& a, const string& b) {
+    return std::equal(a.begin(), a.end(), b.begin(), b.end(), [](char a, char b) { return tolower(a) == tolower(b); });
+}
+
 void QuadTree::dataSumChange(Point p, int res, int sum) {
     dataSum += (sum-res);
     count--;
-    if (node == nullptr){
+    if (nodes.empty()) {
         if ((topLeftPoint.getX() + botRightPoint.getX()) /2 >= p.getX()) {
             if ((topLeftPoint.getY() + botRightPoint.getY()) / 2 >= p.getY()) {
                 topLeftQT->dataSumChange(p, res, sum);
@@ -133,22 +148,24 @@ void QuadTree::dataSumChange(Point p, int res, int sum) {
     }
 }
 
-Node* QuadTree::search(Point p) {
+vector<Node*> QuadTree::search(Point p) {
     if (topLeftPoint.getX() == botRightPoint.getX()) {
-        return (node);
+        return (nodes);
     }
     if ((topLeftPoint.getX() + botRightPoint.getX()) / 2 >= p.getX()) {
         if ((topLeftPoint.getY() + botRightPoint.getY()) / 2 >= p.getY()) {
             if (topLeftQT != nullptr) {
                 return (topLeftQT->search(p));
             } else {
-                return (nullptr);
+                vector<Node*> nulo;
+                return (nulo);
             }
         } else {
             if (botLeftQT != nullptr) {
                 return (botLeftQT->search(p));
             } else {
-                return (nullptr);
+                vector<Node*> nulo;
+                return (nulo);
             }
         }
     } else {
@@ -156,13 +173,15 @@ Node* QuadTree::search(Point p) {
             if (topRightQT != nullptr) {
                 return (topRightQT->search(p));
             } else {
-                return (nullptr);
+                vector<Node*> nulo;
+                return (nulo);
             }
         } else {
             if (botRightQT != nullptr) {
                 return (botRightQT->search(p));
             } else {
-                return (nullptr);
+                vector<Node*> nulo;
+                return (nulo);
             }
         }
     }
@@ -280,8 +299,11 @@ bool QuadTree::inBounds(Point p) {
 vector<Node*> QuadTree::list() {
     vector<Node*> v;
 
-    if (node != nullptr) v.push_back(node);
-    
+    if (!nodes.empty()){
+        for (size_t i = 0; i < nodes.size(); i++){
+            v.push_back(nodes[i]);
+        }
+    }
     if (topLeftQT != nullptr) {
         vector<Node*> topLeftQTList = topLeftQT->list();
         v.insert(v.end(), topLeftQTList.begin(), topLeftQTList.end());

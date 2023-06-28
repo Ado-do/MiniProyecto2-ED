@@ -2,22 +2,24 @@
 
 #include "Point.hpp"
 
-#include <cmath>
-#include <vector>
 #include <iostream>
+#include <vector>
+#include <cmath>
+#include <string>
 
 enum RegionType { WHITE, BLACK };
 
 struct Node {
     Point point;
     int data;
+    std::string city;
 
-    Node(Point = Point(), int = -1);
+    Node(Point = Point(), int = -1, std::string = "N/A");
 };
 
 class QuadTree {
   private:
-    Node* node = nullptr;
+    std::vector<Node*> nodes; // * Vector de Nodos
 
     Point topLeftPoint;
     Point originalBotRightPoint; // Limite Original
@@ -39,20 +41,22 @@ class QuadTree {
     int aggregateRegionAux(Point pTL, Point pBR, QuadTree* QT);
     void dataSumChange(Point, int, int);
 
-  public:
+    bool iequals(const std::string& a, const std::string& b); // Comparar strings sin importar mayusculas o minusculas
+
+   public:
     QuadTree(Point, Point, bool = true);
     ~QuadTree();
 
     // * Extras
     RegionType getType();
-    bool inBounds(Point p);
-    Node* search(Point);
+    bool inBounds(const Point);
+    std::vector<Node*> search(Point);
 
     // * Por enunciado
     int totalPoints();
     int totalNodes();
-    void insert(Point p, int data);
+    void insert(Point , int, std::string);
     std::vector<Node*> list();
-    int countRegion(Point p, int d);
-    int aggregateRegion(Point p, int d);
+    int countRegion(Point , int);
+    int aggregateRegion(Point , int);
 };
