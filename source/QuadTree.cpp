@@ -1,55 +1,55 @@
-#include "..\include\QuadTree.hpp"
+#include "QuadTree.hpp"
+#include "CityNode.hpp"
 
 using std::vector, std::string;
 
-Node::Node(Point p, int d, string c) : point(p), data(d), city(c) {}
-
 QuadTree::QuadTree(Point _topLeft, Point _botRight, bool first) {
-    this->topLeftPoint = _topLeft;
-    this->originalBotRightPoint = _botRight;
-    this->botRightPoint = _botRight;
+    this->topL_point = _topLeft;
+    this->botR_point = _botRight;
+    this->originalBotRPoint = _botRight;
+    
     type = WHITE;
     count = 0;
     dataSum = 0;
     
-    // En caso de ser el primer nodo, se debe modificar el botRightPoint para que sea potencia de 2
+    // En caso de ser el primer nodo, se debe modificar el botR_point para que sea potencia de 2
     if (first) {
-        int n = log2(abs(this->topLeftPoint.getX() - originalBotRightPoint.getX())+1);
-        int m = log2(abs(this->topLeftPoint.getY() - originalBotRightPoint.getY())+1);
+        int n = log2(abs(this->topL_point.getX() - originalBotRPoint.getX())+1);
+        int m = log2(abs(this->topL_point.getY() - originalBotRPoint.getY())+1);
 
         // Se verifica si el punto es potencia de 2
-        if (ceil(log2(abs(this->topLeftPoint.getX() - originalBotRightPoint.getX())+1)) !=
-            floor(log2(abs(this->topLeftPoint.getX() - originalBotRightPoint.getX())+1))) {
+        if (ceil(log2(abs(this->topL_point.getX() - originalBotRPoint.getX())+1)) !=
+            floor(log2(abs(this->topL_point.getX() - originalBotRPoint.getX())+1))) {
 
             // Se busca la potencia de 2 mas cercana
-            while (pow(2, n) < (abs(this->topLeftPoint.getX() - originalBotRightPoint.getX()))+1) {
+            while (pow(2, n) < (abs(this->topL_point.getX() - originalBotRPoint.getX()))+1) {
                 n++;
             }
         }
 
         // Se verifica si el punto es potencia de 2
-        if (ceil(log2(abs(this->topLeftPoint.getY() - originalBotRightPoint.getY()))+1) !=
-            floor(log2(abs(this->topLeftPoint.getY() - originalBotRightPoint.getY()))+1)) {
+        if (ceil(log2(abs(this->topL_point.getY() - originalBotRPoint.getY()))+1) !=
+            floor(log2(abs(this->topL_point.getY() - originalBotRPoint.getY()))+1)) {
             
             // Se busca la potencia de 2 mas cercana
-            while (pow(2, m) < (abs(this->topLeftPoint.getY() - originalBotRightPoint.getY()))+1) {
+            while (pow(2, m) < (abs(this->topL_point.getY() - originalBotRPoint.getY()))+1) {
                 m++;
             }
         }
 
-        // Se modifica el botRightPoint
+        // Se modifica el botR_point
         int max = (n >= m) ? n : m;
-        botRightPoint.setPoint(pow(2, max) + topLeftPoint.getX()-1, pow(2, max) + topLeftPoint.getY()-1);
+        botR_point.setPoint(int(pow(2, max)) + topL_point.getX()-1, int(pow(2, max)) + topL_point.getY()-1);
     } else {
-        this->botRightPoint = _botRight;
+        this->botR_point = _botRight;
     }
 }
 
 QuadTree::~QuadTree() {
-    if (topLeftQT != nullptr) delete topLeftQT;
-    if (topRightQT != nullptr) delete topRightQT;
-    if (botLeftQT != nullptr) delete botLeftQT;
-    if (botRightQT != nullptr) delete botRightQT;
+    if (topL_QT != nullptr) delete topL_QT;
+    if (topR_QT != nullptr) delete topR_QT;
+    if (botL_QT != nullptr) delete botL_QT;
+    if (botR_QT != nullptr) delete botR_QT;
     
     if (!nodes.empty()){
         for (size_t i = 0; i < nodes.size(); i++){
@@ -63,10 +63,10 @@ int QuadTree::totalPoints() { return count; }
 int QuadTree::totalNodes() {
     int count = 1;
 
-    if (topLeftQT != nullptr) count += topLeftQT->totalNodes();
-    if (topRightQT != nullptr) count += topRightQT->totalNodes();
-    if (botLeftQT != nullptr) count += botLeftQT->totalNodes();
-    if (botRightQT != nullptr) count += botRightQT->totalNodes();
+    if (topL_QT != nullptr) count += topL_QT->totalNodes();
+    if (topR_QT != nullptr) count += topR_QT->totalNodes();
+    if (botL_QT != nullptr) count += botL_QT->totalNodes();
+    if (botR_QT != nullptr) count += botR_QT->totalNodes();
 
     return count; 
 }
@@ -79,7 +79,7 @@ void QuadTree::insert(Point p, int data, string city) {
         count++;
 
         // Se crea el nodo en caso de que no exista
-        if ((topLeftPoint.getX() == botRightPoint.getX())) {
+        if ((topL_point.getX() == botR_point.getX())) {
             bool sameCity = false;
             for (size_t i = 0; i < nodes.size(); i++) {
                 if (iequals(nodes[i]->city, city)) {
@@ -90,34 +90,34 @@ void QuadTree::insert(Point p, int data, string city) {
                 }
             }
             if (!sameCity) {
-                Node* node = new Node(p, data, city);
+                CityNode* node = new CityNode(p, data, city);
                 nodes.push_back(node);
             }
         } else {
             // Se crean los cuadrantes en el caso de que no existan
-            if (topLeftQT == nullptr) {
-                topLeftQT  = new QuadTree(topLeftPoint, 
-                                        Point((topLeftPoint.getX() + botRightPoint.getX()) / 2, (topLeftPoint.getY() + botRightPoint.getY()) / 2), false);
-                topRightQT = new QuadTree(Point(((topLeftPoint.getX() + botRightPoint.getX()) / 2) + 1, topLeftPoint.getY()), 
-                                        Point(botRightPoint.getX(), (topLeftPoint.getY() + botRightPoint.getY()) / 2), false);
-                botLeftQT  = new QuadTree(Point(topLeftPoint.getX(), ((topLeftPoint.getY() + botRightPoint.getY()) / 2) + 1), 
-                                        Point((topLeftPoint.getX() + botRightPoint.getX()) / 2, botRightPoint.getY()), false);
-                botRightQT = new QuadTree(Point(((topLeftPoint.getX() + botRightPoint.getX()) / 2) + 1, ((topLeftPoint.getY() + botRightPoint.getY()) / 2) + 1), 
-                                        botRightPoint, false);
+            if (topL_QT == nullptr) {
+                int x = int((floor((topL_point.getX() + botR_point.getX()) / 2.0f)));
+                int y = int((floor((topL_point.getY() + botR_point.getY()) / 2.0f)));
+                topL_QT  = new QuadTree(topL_point, Point(x, y), false);
+                topR_QT = new QuadTree(Point(x + 1, topL_point.getY()), Point(botR_point.getX(), y), false);
+                botL_QT  = new QuadTree(Point(topL_point.getX(), y + 1), Point(x, botR_point.getY()), false);
+                botR_QT = new QuadTree(Point(x + 1, y + 1), botR_point, false);
             }
 
             // Se inserta en el cuadrante correspondiente
-            if ((topLeftPoint.getX() + botRightPoint.getX()) / 2 >= p.getX()) {
-                if ((topLeftPoint.getY() + botRightPoint.getY()) / 2 >= p.getY()) {
-                    topLeftQT->insert(p, data, city);
+            int x = int((floor((topL_point.getX() + botR_point.getX()) / 2.0f)));
+            int y = int((floor((topL_point.getY() + botR_point.getY()) / 2.0f)));
+            if (x >= p.getX()) {
+                if (y >= p.getY()) {
+                    topL_QT->insert(p, data, city);
                 } else {
-                    botLeftQT->insert(p, data, city);
+                    botL_QT->insert(p, data, city);
                 }
             } else {
-                if ((topLeftPoint.getY() + botRightPoint.getY()) / 2 >= p.getY()) {
-                    topRightQT->insert(p, data, city);
+                if (y >= p.getY()) {
+                    topR_QT->insert(p, data, city);
                 } else {
-                    botRightQT->insert(p, data, city);
+                    botR_QT->insert(p, data, city);
                 }
             }
         }
@@ -129,58 +129,62 @@ bool QuadTree::iequals(const string& a, const string& b) {
 }
 
 void QuadTree::dataSumChange(Point p, int res, int sum) {
+    int x = int((floor((topL_point.getX() + botR_point.getX()) / 2.0f)));
+    int y = int((floor((topL_point.getY() + botR_point.getY()) / 2.0f)));
     dataSum += (sum-res);
     count--;
     if (nodes.empty()) {
-        if ((topLeftPoint.getX() + botRightPoint.getX()) /2 >= p.getX()) {
-            if ((topLeftPoint.getY() + botRightPoint.getY()) / 2 >= p.getY()) {
-                topLeftQT->dataSumChange(p, res, sum);
+        if (x >= p.getX()) {
+            if (y >= p.getY()) {
+                topL_QT->dataSumChange(p, res, sum);
             } else {
-                botLeftQT->dataSumChange(p, res, sum);
+                botL_QT->dataSumChange(p, res, sum);
             }
         } else {
-            if ((topLeftPoint.getY() + botRightPoint.getY()) / 2 >= p.getY()) {
-                topRightQT->dataSumChange(p, res, sum);
+            if (y >= p.getY()) {
+                topR_QT->dataSumChange(p, res, sum);
             } else {
-                botRightQT->dataSumChange(p, res, sum);
+                botR_QT->dataSumChange(p, res, sum);
             }
         }
     }
 }
 
-vector<Node*> QuadTree::search(Point p) {
-    if (topLeftPoint.getX() == botRightPoint.getX()) {
+vector<CityNode*> QuadTree::search(Point p) {
+    int x = int((floor((topL_point.getX() + botR_point.getX()) / 2.0f)));
+    int y = int((floor((topL_point.getY() + botR_point.getY()) / 2.0f)));
+    if (topL_point.getX() == botR_point.getX()) {
         return (nodes);
     }
-    if ((topLeftPoint.getX() + botRightPoint.getX()) / 2 >= p.getX()) {
-        if ((topLeftPoint.getY() + botRightPoint.getY()) / 2 >= p.getY()) {
-            if (topLeftQT != nullptr) {
-                return (topLeftQT->search(p));
+    if (x >= p.getX()) {
+        if (y >= p.getY()) {
+            if (topL_QT != nullptr) {
+                return (topL_QT->search(p));
             } else {
-                vector<Node*> nulo;
+                vector<CityNode*> nulo;
                 return (nulo);
             }
         } else {
-            if (botLeftQT != nullptr) {
-                return (botLeftQT->search(p));
+            if (botL_QT != nullptr) {
+                return (botL_QT->search(p));
             } else {
-                vector<Node*> nulo;
+                vector<CityNode*> nulo;
                 return (nulo);
             }
         }
     } else {
-        if ((topLeftPoint.getY() + botRightPoint.getY()) / 2 >= p.getY()) {
-            if (topRightQT != nullptr) {
-                return (topRightQT->search(p));
+        if (y >= p.getY()) {
+            if (topR_QT != nullptr) {
+                return (topR_QT->search(p));
             } else {
-                vector<Node*> nulo;
+                vector<CityNode*> nulo;
                 return (nulo);
             }
         } else {
-            if (botRightQT != nullptr) {
-                return (botRightQT->search(p));
+            if (botR_QT != nullptr) {
+                return (botR_QT->search(p));
             } else {
-                vector<Node*> nulo;
+                vector<CityNode*> nulo;
                 return (nulo);
             }
         }
@@ -191,20 +195,20 @@ int QuadTree::countRegion(Point p, int d) {
     if (inBounds(p)) {
         Point regionTopL = Point(p.getX() - d, p.getY() - d);
         if (!inBounds(regionTopL)) {
-            if (regionTopL.getX() < this->topLeftPoint.getX()) {
-                regionTopL.setPoint(topLeftPoint.getX(), regionTopL.getY());
+            if (regionTopL.getX() < this->topL_point.getX()) {
+                regionTopL.setPoint(topL_point.getX(), regionTopL.getY());
             }
-            if (regionTopL.getY() < this->topLeftPoint.getY()) {
-                regionTopL.setPoint(regionTopL.getX(), topLeftPoint.getY());
+            if (regionTopL.getY() < this->topL_point.getY()) {
+                regionTopL.setPoint(regionTopL.getX(), topL_point.getY());
             }
         }
         Point regionBotR = Point(p.getX() + d, p.getY() + d);
         if (!inBounds(regionBotR)) {
-            if (regionBotR.getX() > this->botRightPoint.getX()) {
-                regionBotR.setPoint(botRightPoint.getX(), regionBotR.getY());
+            if (regionBotR.getX() > this->botR_point.getX()) {
+                regionBotR.setPoint(botR_point.getX(), regionBotR.getY());
             }
-            if (regionBotR.getY() > this->botRightPoint.getY()) {
-                regionBotR.setPoint(regionBotR.getX(), botRightPoint.getY());
+            if (regionBotR.getY() > this->botR_point.getY()) {
+                regionBotR.setPoint(regionBotR.getX(), botR_point.getY());
             }
         }
         return countRegionAux(regionTopL, regionBotR, this);
@@ -214,25 +218,25 @@ int QuadTree::countRegion(Point p, int d) {
 
 int QuadTree::countRegionAux(Point pTL, Point pBR, QuadTree* QT) {
     int sum = 0;
-    if (QT->topLeftPoint.getX() >= pTL.getX() && QT->topLeftPoint.getY() >= pTL.getY() &&
-        QT->botRightPoint.getX() <= pBR.getX() && QT->botRightPoint.getY() <= pBR.getY()) {
+    if (QT->topL_point.getX() >= pTL.getX() && QT->topL_point.getY() >= pTL.getY() &&
+        QT->botR_point.getX() <= pBR.getX() && QT->botR_point.getY() <= pBR.getY()) {
         return (QT->count);
     }
-    if (QT->botRightPoint.getX() < pTL.getX() || QT->botRightPoint.getY() < pTL.getY() ||
-       QT->topLeftPoint.getX() > pBR.getX() || QT->topLeftPoint.getY() > pBR.getY()){
+    if (QT->botR_point.getX() < pTL.getX() || QT->botR_point.getY() < pTL.getY() ||
+       QT->topL_point.getX() > pBR.getX() || QT->topL_point.getY() > pBR.getY()){
         return sum;
     }
-    if (QT->topLeftQT != nullptr) {
-        sum = sum + countRegionAux(pTL, pBR, QT->topLeftQT);
+    if (QT->topL_QT != nullptr) {
+        sum = sum + countRegionAux(pTL, pBR, QT->topL_QT);
     }
-    if (QT->topRightQT != nullptr) {
-        sum = sum + countRegionAux(pTL, pBR, QT->topRightQT);
+    if (QT->topR_QT != nullptr) {
+        sum = sum + countRegionAux(pTL, pBR, QT->topR_QT);
     }
-    if (QT->botLeftQT != nullptr) {
-        sum = sum + countRegionAux(pTL, pBR, QT->botLeftQT);
+    if (QT->botL_QT != nullptr) {
+        sum = sum + countRegionAux(pTL, pBR, QT->botL_QT);
     }
-    if (QT->botRightQT != nullptr) {
-        sum = sum + countRegionAux(pTL, pBR, QT->botRightQT);
+    if (QT->botR_QT != nullptr) {
+        sum = sum + countRegionAux(pTL, pBR, QT->botR_QT);
     }
     return (sum);
 }
@@ -241,20 +245,20 @@ int QuadTree::aggregateRegion(Point p, int d) {
     if (inBounds(p)) {
         Point pTL = Point(p.getX() - d, p.getY() - d);
         if (!inBounds(pTL)) {
-            if (pTL.getX() < this->topLeftPoint.getX()) {
-                pTL.setPoint(topLeftPoint.getX(), pTL.getY());
+            if (pTL.getX() < this->topL_point.getX()) {
+                pTL.setPoint(topL_point.getX(), pTL.getY());
             }
-            if (pTL.getY() < this->topLeftPoint.getY()) {
-                pTL.setPoint(pTL.getX(), topLeftPoint.getY());
+            if (pTL.getY() < this->topL_point.getY()) {
+                pTL.setPoint(pTL.getX(), topL_point.getY());
             }
         }
         Point pBR = Point(p.getX() + d, p.getY() + d);
         if (!inBounds(pBR)) {
-            if (pBR.getX() > this->botRightPoint.getX()) {
-                pBR.setPoint(botRightPoint.getX(), pBR.getY());
+            if (pBR.getX() > this->botR_point.getX()) {
+                pBR.setPoint(botR_point.getX(), pBR.getY());
             }
-            if (pBR.getY() > this->botRightPoint.getY()) {
-                pBR.setPoint(pBR.getX(), botRightPoint.getY());
+            if (pBR.getY() > this->botR_point.getY()) {
+                pBR.setPoint(pBR.getX(), botR_point.getY());
             }
         }
         return aggregateRegionAux(pTL, pBR, this);
@@ -264,25 +268,25 @@ int QuadTree::aggregateRegion(Point p, int d) {
 
 int QuadTree::aggregateRegionAux(Point pTL, Point pBR, QuadTree* QT) {
     int sum = 0;
-    if (QT->topLeftPoint.getX() >= pTL.getX() && QT->topLeftPoint.getY() >= pTL.getY() &&
-        QT->botRightPoint.getX() <= pBR.getX() && QT->botRightPoint.getY() <= pBR.getY()) {
+    if (QT->topL_point.getX() >= pTL.getX() && QT->topL_point.getY() >= pTL.getY() &&
+        QT->botR_point.getX() <= pBR.getX() && QT->botR_point.getY() <= pBR.getY()) {
         return (QT->dataSum);
     }
-    if (QT->botRightPoint.getX() < pTL.getX() || QT->botRightPoint.getY() < pTL.getY() ||
-        QT->topLeftPoint.getX() > pBR.getX() || QT->topLeftPoint.getY() > pBR.getY()) {
+    if (QT->botR_point.getX() < pTL.getX() || QT->botR_point.getY() < pTL.getY() ||
+        QT->topL_point.getX() > pBR.getX() || QT->topL_point.getY() > pBR.getY()) {
         return sum;
     }
-    if (QT->topLeftQT != nullptr) {
-        sum += aggregateRegionAux(pTL, pBR, QT->topLeftQT);
+    if (QT->topL_QT != nullptr) {
+        sum += aggregateRegionAux(pTL, pBR, QT->topL_QT);
     }
-    if (QT->topRightQT != nullptr) {
-        sum += aggregateRegionAux(pTL, pBR, QT->topRightQT);
+    if (QT->topR_QT != nullptr) {
+        sum += aggregateRegionAux(pTL, pBR, QT->topR_QT);
     }
-    if (QT->botLeftQT != nullptr) {
-        sum += aggregateRegionAux(pTL, pBR, QT->botLeftQT);
+    if (QT->botL_QT != nullptr) {
+        sum += aggregateRegionAux(pTL, pBR, QT->botL_QT);
     }
-    if (QT->botRightQT != nullptr) {
-        sum += aggregateRegionAux(pTL, pBR, QT->botRightQT);
+    if (QT->botR_QT != nullptr) {
+        sum += aggregateRegionAux(pTL, pBR, QT->botR_QT);
     }
         
     return (sum);
@@ -292,33 +296,33 @@ int QuadTree::aggregateRegionAux(Point pTL, Point pBR, QuadTree* QT) {
 RegionType QuadTree::getType() { return (type); }
 
 bool QuadTree::inBounds(Point p) {
-    return (p.getX() >= topLeftPoint.getX() && p.getX() <= originalBotRightPoint.getX() &&
-            p.getY() >= topLeftPoint.getY() && p.getY() <= originalBotRightPoint.getY());
+    return (p.getX() >= topL_point.getX() && p.getX() <= originalBotRPoint.getX() &&
+            p.getY() >= topL_point.getY() && p.getY() <= originalBotRPoint.getY());
 }
 
-vector<Node*> QuadTree::list() {
-    vector<Node*> v;
+vector<CityNode*> QuadTree::list() {
+    vector<CityNode*> v;
 
     if (!nodes.empty()){
         for (size_t i = 0; i < nodes.size(); i++){
             v.push_back(nodes[i]);
         }
     }
-    if (topLeftQT != nullptr) {
-        vector<Node*> topLeftQTList = topLeftQT->list();
-        v.insert(v.end(), topLeftQTList.begin(), topLeftQTList.end());
+    if (topL_QT != nullptr) {
+        vector<CityNode*> topL_list = topL_QT->list();
+        v.insert(v.end(), topL_list.begin(), topL_list.end());
     }
-    if (topRightQT != nullptr) {
-        vector<Node*> topRightQTList = topRightQT->list();
-        v.insert(v.end(), topRightQTList.begin(), topRightQTList.end());
+    if (topR_QT != nullptr) {
+        vector<CityNode*> topR_list = topR_QT->list();
+        v.insert(v.end(), topR_list.begin(), topR_list.end());
     }
-    if (botLeftQT != nullptr) {
-        vector<Node*> botLeftQTList = botLeftQT->list();
-        v.insert(v.end(), botLeftQTList.begin(), botLeftQTList.end());
+    if (botL_QT != nullptr) {
+        vector<CityNode*> botL_list = botL_QT->list();
+        v.insert(v.end(), botL_list.begin(), botL_list.end());
     }
-    if (botRightQT != nullptr) {
-        vector<Node*> botRightQTList = botRightQT->list();
-        v.insert(v.end(), botRightQTList.begin(), botRightQTList.end());
+    if (botR_QT != nullptr) {
+        vector<CityNode*> botR_list = botR_QT->list();
+        v.insert(v.end(), botR_list.begin(), botR_list.end());
     }
     return v;
 }

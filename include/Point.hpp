@@ -2,13 +2,15 @@
 
 class Point {
   private:
-    int x, y;
     double dx,dy;
+    int x, y;
     
   public:
-    Point(int = -1, int = -1); //double double x= (int)(dx*1000) y = (int)(dy*1000)
+    Point(double = -1, double = -1); //double double x= (int)(dx*1000) y = (int)(dy*1000)
+    Point(int, int);
 
+    void setPoint(double, double);
     void setPoint(int, int);
-    int getX();
-    int getY();
+    int getX() const;
+    int getY() const;
 };
