@@ -33,7 +33,7 @@ class QuadTree {
     int aggregateRegionAux(Point pTL, Point pBR, QuadTree* QT);
     void dataSumChange(Point, int, int);
 
-    bool iequals(const std::string& a, const std::string& b); // Comparar strings sin importar mayusculas o minusculas
+    bool iequals(const std::string& a, const std::string& b); // Comparar strings sin importar mayúsculas o minúsculas
 
    public:
     QuadTree(Point, Point, bool = true);

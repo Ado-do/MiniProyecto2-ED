@@ -1,12 +1,14 @@
-#include "include\QuadTree.hpp"
+#include "QuadTree.hpp"
 
 #include <iostream>
 #include <vector>
 #include <fstream>
-
 using std::cout, std::endl, std::vector;
 
-// Compile: g++ -Wall -std=c++17 -o main main.cpp source/*.cpp -I include
+// * Compile: 
+// g++ -Wall -std=c++17 -o build/testQT tests/testQT.cpp source/*.cpp -I include
+// * Execute: 
+// ./build/testQT
 
 int main() {
     QuadTree qt(Point(-0.008, -0.008), Point(0.000, 0.000));
